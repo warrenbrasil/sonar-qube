@@ -1,0 +1,211 @@
+name: "Warren - Run Tests and SonarQube Analysis"
+description: "Run .NET Tests and sends the result to SonarQube"
+branding:
+  icon: "thermometer"
+  color: "red"
+inputs:
+  sonar-token:
+    description: "SonarQube token"
+    required: true
+  sonar-host-url:
+    description: "SonarQube URL"
+    required: true
+  sonar-project-key:
+    description: "SonarQube project key"
+    required: true
+  sonar-organization:
+    description: "SonarQube organization name"
+    required: true
+  solution:
+    description: "Solution file name without the .sln extension (do not use with project input parameter)"
+    required: false
+    default: ""
+  project:
+    description: "The path of test project to be tested (do not use with solution input parameter)"
+    required: false
+    default: ""
+  tests-dir:
+    description: "The directory name which contains all the tests projects (default is tests)"
+    required: false
+    default: "tests"
+  code-exclusions:
+    description: "The matching path for code that should be excluded from coverage (absolute, relative and pattern paths are acceptable)"
+    required: false
+    default: ""
+  assembly-exclusions:
+    description: "The matching pattern for assemblies that should be excluded from coverage (absolute, relative and pattern paths are acceptable)"
+    required: false
+    default: ""
+  pull-request:
+    description: "Boolean to change behavior of dotnet-sonarscanner for pull requests"
+    required: true
+  branch-name:
+    description: "Branch name to be displayed on SonarQube (required when pull-request is false)"
+    required: false
+  pull-request-number:
+    description: "The number of the pull request (required when pull-request is true)"
+    required: false
+  pull-request-base:
+    description: "The target branch name from the pull request (required when pull-request is true)"
+    required: false
+  pull-request-head:
+    description: "The target source name from the pull request (required when pull-request is true)"
+    required: false
+runs:
+  using: composite
+  steps:
+    - name: Setup JDK
+      uses: actions/setup-java@v3
+      with:
+        distribution: "zulu"
+        java-version: 18
+
+    - name: Cache SonarQube Packages
+      uses: actions/cache@v1
+      with:
+        path: ~\sonar\cache
+        key: ${{ runner.os }}-sonar
+        restore-keys: ${{ runner.os }}-sonar
+
+    - name: Cache SonarQube Scanner
+      id: cache-sonar-scanner
+      uses: actions/cache@v1
+      with:
+        path: .\.sonar\scanner
+        key: ${{ runner.os }}-sonar-scanner
+        restore-keys: ${{ runner.os }}-sonar-scanner
+
+    - name: Install SonarQube Scanner
+      if: steps.cache-sonar-scanner.outputs.cache-hit != 'true'
+      shell: bash
+      run: dotnet tool update dotnet-sonarscanner --tool-path ./.sonar/scanner
+
+    - name: Begin SonarQube Scan for Pull Request
+      if: ${{ inputs.pull-request == 'true' && (inputs.code-exclusions != '' || inputs.assembly-exclusions != '') }}
+      shell: bash
+      env:
+        SONAR_TOKEN: ${{ inputs.sonar-token }}
+        SONAR_HOST_URL: ${{ inputs.sonar-host-url }}
+        SONAR_PROJECT_KEY: ${{ inputs.sonar-project-key }}
+        SONAR_ORGANIZATION: ${{ inputs.sonar-organization }}
+        CODE_EXCLUSIONS: ${{ inputs.code-exclusions || inputs.assembly-exclusions }}
+        PR_NUMBER: ${{ inputs.pull-request-number }}
+        PR_BASE: ${{ inputs.pull-request-base }}
+        PR_HEAD: ${{ inputs.pull-request-head }}
+        TESTS_DIR: ${{ inputs.tests-dir }}
+      run: |
+        ./.sonar/scanner/dotnet-sonarscanner begin \
+        /k:"$SONAR_PROJECT_KEY" \
+        /o:"$SONAR_ORGANIZATION" \
+        /d:sonar.pullrequest.key="$PR_NUMBER" \
+        /d:sonar.pullrequest.branch="$PR_HEAD" \
+        /d:sonar.pullrequest.base="$PR_BASE" \
+        /d:sonar.login="$SONAR_TOKEN" \
+        /d:sonar.host.url="$SONAR_HOST_URL" \
+        /d:sonar.coverage.exclusions="$CODE_EXCLUSIONS" \
+        /d:sonar.cs.opencover.reportsPaths="./$TESTS_DIR/**/results/*.opencover.xml"
+
+    - name: Begin SonarQube Scan for Pull Request
+      if: ${{ inputs.pull-request == 'true' && inputs.code-exclusions == '' }}
+      shell: bash
+      env:
+        SONAR_TOKEN: ${{ inputs.sonar-token }}
+        SONAR_HOST_URL: ${{ inputs.sonar-host-url }}
+        SONAR_PROJECT_KEY: ${{ inputs.sonar-project-key }}
+        SONAR_ORGANIZATION: ${{ inputs.sonar-organization }}
+        PR_NUMBER: ${{ inputs.pull-request-number }}
+        PR_BASE: ${{ inputs.pull-request-base }}
+        PR_HEAD: ${{ inputs.pull-request-head }}
+        TESTS_DIR: ${{ inputs.tests-dir }}
+      run: |
+        ./.sonar/scanner/dotnet-sonarscanner begin \
+        /k:"$SONAR_PROJECT_KEY" \
+        /o:"$SONAR_ORGANIZATION" \
+        /d:sonar.pullrequest.key="$PR_NUMBER" \
+        /d:sonar.pullrequest.branch="$PR_HEAD" \
+        /d:sonar.pullrequest.base="$PR_BASE" \
+        /d:sonar.login="$SONAR_TOKEN" \
+        /d:sonar.host.url="$SONAR_HOST_URL" \
+        /d:sonar.cs.opencover.reportsPaths="./$TESTS_DIR/**/results/*.opencover.xml"
+
+    - name: Begin SonarQube Scan
+      if: ${{ inputs.pull-request == 'false' && (inputs.code-exclusions != '' || inputs.assembly-exclusions != '') }}
+      shell: bash
+      env:
+        SONAR_TOKEN: ${{ inputs.sonar-token }}
+        SONAR_HOST_URL: ${{ inputs.sonar-host-url }}
+        SONAR_PROJECT_KEY: ${{ inputs.sonar-project-key }}
+        SONAR_ORGANIZATION: ${{ inputs.sonar-organization }}
+        CODE_EXCLUSIONS: ${{ inputs.code-exclusions || inputs.assembly-exclusions }}
+        BRANCH_NAME: ${{ inputs.branch-name }}
+        TESTS_DIR: ${{ inputs.tests-dir }}
+      run: |
+        ./.sonar/scanner/dotnet-sonarscanner begin \
+        /k:"$SONAR_PROJECT_KEY" \
+        /o:"$SONAR_ORGANIZATION" \
+        /d:sonar.branch.name="$BRANCH_NAME" \
+        /d:sonar.login="$SONAR_TOKEN" \
+        /d:sonar.host.url="$SONAR_HOST_URL" \
+        /d:sonar.coverage.exclusions="$CODE_EXCLUSIONS" \
+        /d:sonar.cs.opencover.reportsPaths="./$TESTS_DIR/**/results/*.opencover.xml"
+
+    - name: Begin SonarQube Scan
+      if: ${{ inputs.pull-request == 'false' && inputs.code-exclusions == '' }}
+      shell: bash
+      env:
+        SONAR_TOKEN: ${{ inputs.sonar-token }}
+        SONAR_HOST_URL: ${{ inputs.sonar-host-url }}
+        SONAR_PROJECT_KEY: ${{ inputs.sonar-project-key }}
+        SONAR_ORGANIZATION: ${{ inputs.sonar-organization }}
+        BRANCH_NAME: ${{ inputs.branch-name }}
+        TESTS_DIR: ${{ inputs.tests-dir }}
+      run: |
+        ./.sonar/scanner/dotnet-sonarscanner begin \
+        /k:"$SONAR_PROJECT_KEY" \
+        /o:"$SONAR_ORGANIZATION" \
+        /d:sonar.branch.name="$BRANCH_NAME" \
+        /d:sonar.login="$SONAR_TOKEN" \
+        /d:sonar.host.url="$SONAR_HOST_URL" \
+        /d:sonar.cs.opencover.reportsPaths="./$TESTS_DIR/**/results/*.opencover.xml"
+
+    - name: Run tests
+      if: ${{ inputs.solution != '' && inputs.project == '' }}
+      shell: bash
+      env:
+        SOLUTION: ${{ inputs.solution }}
+        CODE_EXCLUSIONS: ${{ inputs.code-exclusions }}
+        ASSEMBLY_EXCLUSIONS: ${{ inputs.assembly-exclusions }}
+      run: |
+        dotnet test $SOLUTION.sln \
+        /p:CollectCoverage=true \
+        /p:ExcludeByAttribute="CompilerGeneratedAttribute" \
+        /p:ExcludeByFile="${{ env.CODE_EXCLUSIONS }}" \
+        /p:Exclude="${{ env.ASSEMBLY_EXCLUSIONS }}" \
+        /p:MergeWith=./results/*.opencover.xml \
+        /p:CoverletOutput=./results/ \
+        /p:CoverletOutputFormat=opencover \
+        --logger "GitHubActions;report-warnings=false"
+
+    - name: Run tests
+      if: ${{ inputs.solution == '' && inputs.project != '' }}
+      shell: bash
+      env:
+        PROJECT: ${{ inputs.project }}
+        CODE_EXCLUSIONS: ${{ inputs.code-exclusions }}
+        ASSEMBLY_EXCLUSIONS: ${{ inputs.assembly-exclusions }}
+      run: |
+        dotnet test $PROJECT \
+        /p:CollectCoverage=true \
+        /p:ExcludeByAttribute="CompilerGeneratedAttribute" \
+        /p:ExcludeByFile="${{ env.CODE_EXCLUSIONS }}" \
+        /p:Exclude="${{ env.ASSEMBLY_EXCLUSIONS }}" \
+        /p:MergeWith=./results/*.opencover.xml \
+        /p:CoverletOutput=./results/ \
+        /p:CoverletOutputFormat=opencover \
+        --logger "GitHubActions;report-warnings=false"
+
+    - name: End Sonar Scan
+      shell: bash
+      env:
+        SONAR_TOKEN: ${{ inputs.sonar-token }}
+      run: ./.sonar/scanner/dotnet-sonarscanner end /d:sonar.login="$SONAR_TOKEN"
