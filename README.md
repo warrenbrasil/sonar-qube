@@ -1,6 +1,6 @@
 # Warren - Run Tests and SonarQube Analysis :test_tube:
 
-This action is responsible for running tests and publish the test resports to SonarQube.
+This action is responsible for running tests and publish the test resport to SonarQube.
 
 ## Prerequisites
 
