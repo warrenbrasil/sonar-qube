@@ -1,7 +1,7 @@
 name: "Warren - Run Tests and SonarQube Analysis"
 description: "Run .NET Tests and sends the result to SonarQube"
 branding:
-  icon: "thermometer"
+  icon: "activity"
   color: "red"
 inputs:
   sonar-token:
