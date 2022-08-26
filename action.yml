@@ -51,6 +51,10 @@ inputs:
   pull-request-head:
     description: "The target source name from the pull request (required when pull-request is true)"
     required: false
+  quality-gate-wait:
+    description: "Poll to SonarQube instance until the Quality Gate status is available"
+    required: false
+    default: true
 runs:
   using: composite
   steps:
@@ -93,6 +97,7 @@ runs:
         PR_BASE: ${{ inputs.pull-request-base }}
         PR_HEAD: ${{ inputs.pull-request-head }}
         TESTS_DIR: ${{ inputs.tests-dir }}
+        QUALITY_GATE_WAIT: ${{inputs.quality-gate-wait }}
       run: |
         ./.sonar/scanner/dotnet-sonarscanner begin \
         /k:"$SONAR_PROJECT_KEY" \
@@ -102,6 +107,7 @@ runs:
         /d:sonar.pullrequest.base="$PR_BASE" \
         /d:sonar.login="$SONAR_TOKEN" \
         /d:sonar.host.url="$SONAR_HOST_URL" \
+        /d:sonar.qualitygate.wait=$QUALITY_GATE_WAIT \
         /d:sonar.coverage.exclusions="$CODE_EXCLUSIONS" \
         /d:sonar.cs.opencover.reportsPaths="./$TESTS_DIR/**/results/*.opencover.xml"
 
@@ -117,6 +123,7 @@ runs:
         PR_BASE: ${{ inputs.pull-request-base }}
         PR_HEAD: ${{ inputs.pull-request-head }}
         TESTS_DIR: ${{ inputs.tests-dir }}
+        QUALITY_GATE_WAIT: ${{inputs.quality-gate-wait }}
       run: |
         ./.sonar/scanner/dotnet-sonarscanner begin \
         /k:"$SONAR_PROJECT_KEY" \
@@ -126,6 +133,7 @@ runs:
         /d:sonar.pullrequest.base="$PR_BASE" \
         /d:sonar.login="$SONAR_TOKEN" \
         /d:sonar.host.url="$SONAR_HOST_URL" \
+        /d:sonar.qualitygate.wait=$QUALITY_GATE_WAIT \
         /d:sonar.cs.opencover.reportsPaths="./$TESTS_DIR/**/results/*.opencover.xml"
 
     - name: Begin SonarQube Scan
