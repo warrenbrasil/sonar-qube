@@ -173,13 +173,11 @@ runs:
       shell: bash
       env:
         SOLUTION: ${{ inputs.solution }}
-        CODE_EXCLUSIONS: ${{ inputs.code-exclusions }}
         ASSEMBLY_EXCLUSIONS: ${{ inputs.assembly-exclusions }}
       run: |
         dotnet test $SOLUTION.sln \
         /p:CollectCoverage=true \
         /p:ExcludeByAttribute="CompilerGeneratedAttribute" \
-        /p:ExcludeByFile="${{ env.CODE_EXCLUSIONS }}" \
         /p:Exclude="${{ env.ASSEMBLY_EXCLUSIONS }}" \
         /p:MergeWith=./results/*.opencover.xml \
         /p:CoverletOutput=./results/ \
@@ -191,13 +189,11 @@ runs:
       shell: bash
       env:
         PROJECT: ${{ inputs.project }}
-        CODE_EXCLUSIONS: ${{ inputs.code-exclusions }}
         ASSEMBLY_EXCLUSIONS: ${{ inputs.assembly-exclusions }}
       run: |
         dotnet test $PROJECT \
         /p:CollectCoverage=true \
         /p:ExcludeByAttribute="CompilerGeneratedAttribute" \
-        /p:ExcludeByFile="${{ env.CODE_EXCLUSIONS }}" \
         /p:Exclude="${{ env.ASSEMBLY_EXCLUSIONS }}" \
         /p:MergeWith=./results/*.opencover.xml \
         /p:CoverletOutput=./results/ \
