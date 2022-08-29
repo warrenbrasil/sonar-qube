@@ -84,10 +84,6 @@ The target source name from the pull request
 
 **Optional**: The matching path for code that should be excluded from coverage **(absolute, relative and pattern paths are acceptable)**
 
-### `assembly-exclusions`
-
-**Optional**: The matching pattern for assemblies that should be excluded from coverage **(absolute, relative and pattern paths are acceptable)**
-
 ### `quality-gate-wait`
 
 **Optional**: Poll to SonarQube instance until the Quality Gate status is available **(default is `true`)**
@@ -156,40 +152,6 @@ Using with multiline file code exclusions:
     code-exclusions: >-
       tests/Warren.Core.MyRepo.Fixtures/**/*.cs,
       src/Warren.Core.MyRepo.Services/**/*.cs
-    pull-request: false
-    branch-name: ${{ github.head_ref || github.ref_name }}
-```
-
-Using with assembly exclusions:
-
-```yml
-- name: Warren - Run Tests and SonarQube Analysis
-  uses: warrenbrasil/sonar-qube@v2
-  with:
-    sonar-token: ${{ secrets.SONAR_TOKEN }}
-    sonar-host-url: ${{ secrets.SONAR_HOST_URL }}
-    sonar-project-key: myorg_my-project-key
-    sonar-organization: myorg
-    solution: Warren.Core.MyRepo
-    assembly-exclusions: "[*.Tests.*]*"
-    pull-request: false
-    branch-name: ${{ github.head_ref || github.ref_name }}
-```
-
-Using with multiline assembly exclusions:
-
-```yml
-- name: Warren - Run Tests and SonarQube Analysis
-  uses: warrenbrasil/sonar-qube@v2
-  with:
-    sonar-token: ${{ secrets.SONAR_TOKEN }}
-    sonar-host-url: ${{ secrets.SONAR_HOST_URL }}
-    sonar-project-key: myorg_my-project-key
-    sonar-organization: myorg
-    solution: Warren.Core.MyRepo
-    assembly-exclusions: >-
-      "[*.Tests.*]*%2c
-      [Warren.Core.MyRepo.Services]*"
     pull-request: false
     branch-name: ${{ github.head_ref || github.ref_name }}
 ```

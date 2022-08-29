@@ -32,10 +32,6 @@ inputs:
     description: "The matching path for code that should be excluded from coverage (absolute, relative and pattern paths are acceptable)"
     required: false
     default: ""
-  assembly-exclusions:
-    description: "The matching pattern for assemblies that should be excluded from coverage (absolute, relative and pattern paths are acceptable)"
-    required: false
-    default: ""
   pull-request:
     description: "Boolean to change behavior of dotnet-sonarscanner for pull requests"
     required: true
@@ -85,14 +81,14 @@ runs:
       run: dotnet tool update dotnet-sonarscanner --tool-path ./.sonar/scanner
 
     - name: Begin SonarQube Scan for Pull Request
-      if: ${{ inputs.pull-request == 'true' && (inputs.code-exclusions != '' || inputs.assembly-exclusions != '') }}
+      if: ${{ inputs.pull-request == 'true' && inputs.code-exclusions != '' }}
       shell: bash
       env:
         SONAR_TOKEN: ${{ inputs.sonar-token }}
         SONAR_HOST_URL: ${{ inputs.sonar-host-url }}
         SONAR_PROJECT_KEY: ${{ inputs.sonar-project-key }}
         SONAR_ORGANIZATION: ${{ inputs.sonar-organization }}
-        CODE_EXCLUSIONS: ${{ inputs.code-exclusions || inputs.assembly-exclusions }}
+        CODE_EXCLUSIONS: ${{ inputs.code-exclusions }}
         PR_NUMBER: ${{ inputs.pull-request-number }}
         PR_BASE: ${{ inputs.pull-request-base }}
         PR_HEAD: ${{ inputs.pull-request-head }}
@@ -137,14 +133,14 @@ runs:
         /d:sonar.cs.opencover.reportsPaths="./$TESTS_DIR/**/results/*.opencover.xml"
 
     - name: Begin SonarQube Scan
-      if: ${{ inputs.pull-request == 'false' && (inputs.code-exclusions != '' || inputs.assembly-exclusions != '') }}
+      if: ${{ inputs.pull-request == 'false' && inputs.code-exclusions != '' }}
       shell: bash
       env:
         SONAR_TOKEN: ${{ inputs.sonar-token }}
         SONAR_HOST_URL: ${{ inputs.sonar-host-url }}
         SONAR_PROJECT_KEY: ${{ inputs.sonar-project-key }}
         SONAR_ORGANIZATION: ${{ inputs.sonar-organization }}
-        CODE_EXCLUSIONS: ${{ inputs.code-exclusions || inputs.assembly-exclusions }}
+        CODE_EXCLUSIONS: ${{ inputs.code-exclusions }}
         BRANCH_NAME: ${{ inputs.branch-name }}
         TESTS_DIR: ${{ inputs.tests-dir }}
       run: |
@@ -181,12 +177,10 @@ runs:
       shell: bash
       env:
         SOLUTION: ${{ inputs.solution }}
-        ASSEMBLY_EXCLUSIONS: ${{ inputs.assembly-exclusions }}
       run: |
         dotnet test $SOLUTION.sln \
         /p:CollectCoverage=true \
         /p:ExcludeByAttribute="CompilerGeneratedAttribute" \
-        /p:Exclude="${{ env.ASSEMBLY_EXCLUSIONS }}" \
         /p:MergeWith=./results/*.opencover.xml \
         /p:CoverletOutput=./results/ \
         /p:CoverletOutputFormat=opencover \
@@ -197,12 +191,10 @@ runs:
       shell: bash
       env:
         PROJECT: ${{ inputs.project }}
-        ASSEMBLY_EXCLUSIONS: ${{ inputs.assembly-exclusions }}
       run: |
         dotnet test $PROJECT \
         /p:CollectCoverage=true \
         /p:ExcludeByAttribute="CompilerGeneratedAttribute" \
-        /p:Exclude="${{ env.ASSEMBLY_EXCLUSIONS }}" \
         /p:MergeWith=./results/*.opencover.xml \
         /p:CoverletOutput=./results/ \
         /p:CoverletOutputFormat=opencover \
