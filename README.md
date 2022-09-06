@@ -88,6 +88,12 @@ The target source name from the pull request
 
 **Optional**: Poll to SonarQube instance until the Quality Gate status is available **(default is `true`)**
 
+### `verbosity`
+
+**Optional**: Verbosity level for `dotnet test` command **(default is `m`)**
+
+Allowed values are `q[uiet]`, `m[inimal]`, `n[ormal]`, `d[etailed]`, and `diag[nostic]`
+
 ## Usage
 
 Using for push on long-lived branches:
