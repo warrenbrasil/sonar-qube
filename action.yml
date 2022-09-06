@@ -51,6 +51,10 @@ inputs:
     description: "Poll to SonarQube instance until the Quality Gate status is available"
     required: false
     default: true
+  verbosity:
+    description: "Verbosity level for dotnet test command"
+    required: false
+    default: m
 runs:
   using: composite
   steps:
@@ -177,6 +181,7 @@ runs:
       shell: bash
       env:
         SOLUTION: ${{ inputs.solution }}
+        VERBOSITY: ${{ inputs.verbosity }}
       run: |
         dotnet test $SOLUTION.sln \
         /p:CollectCoverage=true \
@@ -184,13 +189,15 @@ runs:
         /p:MergeWith=./results/*.opencover.xml \
         /p:CoverletOutput=./results/ \
         /p:CoverletOutputFormat=opencover \
-        --logger "GitHubActions;report-warnings=false"
+        --logger "GitHubActions;report-warnings=false" \
+        --verbosity $VERBOSITY
 
     - name: Run tests
       if: ${{ inputs.solution == '' && inputs.project != '' }}
       shell: bash
       env:
         PROJECT: ${{ inputs.project }}
+        VERBOSITY: ${{ inputs.verbosity }}
       run: |
         dotnet test $PROJECT \
         /p:CollectCoverage=true \
@@ -198,7 +205,8 @@ runs:
         /p:MergeWith=./results/*.opencover.xml \
         /p:CoverletOutput=./results/ \
         /p:CoverletOutputFormat=opencover \
-        --logger "GitHubActions;report-warnings=false"
+        --logger "GitHubActions;report-warnings=false" \
+        --verbosity $VERBOSITY
 
     - name: End Sonar Scan
       shell: bash
