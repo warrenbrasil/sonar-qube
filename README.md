@@ -115,7 +115,7 @@ Using for pull requests:
 
 ```yml
 - name: Warren - Run Tests and SonarQube Analysis
-  uses: warrenbrasil/sonar-qube@v2
+  uses: warrenbrasil/sonar-qube@v3
   with:
     sonar-token: ${{ secrets.SONAR_TOKEN }}
     sonar-host-url: ${{ secrets.SONAR_HOST_URL }}
@@ -132,7 +132,7 @@ Using with file code exclusions:
 
 ```yml
 - name: Warren - Run Tests and SonarQube Analysis
-  uses: warrenbrasil/sonar-qube@v2
+  uses: warrenbrasil/sonar-qube@v3
   with:
     sonar-token: ${{ secrets.SONAR_TOKEN }}
     sonar-host-url: ${{ secrets.SONAR_HOST_URL }}
@@ -148,7 +148,7 @@ Using with multiline file code exclusions:
 
 ```yml
 - name: Warren - Run Tests and SonarQube Analysis
-  uses: warrenbrasil/sonar-qube@v2
+  uses: warrenbrasil/sonar-qube@v3
   with:
     sonar-token: ${{ secrets.SONAR_TOKEN }}
     sonar-host-url: ${{ secrets.SONAR_HOST_URL }}
