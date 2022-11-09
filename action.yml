@@ -61,8 +61,8 @@ runs:
     - name: Setup JDK
       uses: actions/setup-java@v3
       with:
-        distribution: "zulu"
-        java-version: 18
+        distribution: "microsoft"
+        java-version: 17
 
     - name: Cache SonarQube Packages
       uses: actions/cache@v1
