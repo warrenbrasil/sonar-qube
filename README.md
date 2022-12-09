@@ -94,6 +94,12 @@ The target source name from the pull request
 
 Allowed values are `q[uiet]`, `m[inimal]`, `n[ormal]`, `d[etailed]`, and `diag[nostic]`
 
+### `target_frameworks`
+
+**Optional**: The target frameworks on which the tests will run. **(default is `net6.0`)**
+
+Possible values are available [here](https://learn.microsoft.com/en-us/dotnet/standard/frameworks).
+
 ## Usage
 
 Using for push on long-lived branches:
