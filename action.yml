@@ -58,11 +58,11 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: Setup JDK
-      uses: actions/setup-java@v3
-      with:
-        distribution: "microsoft"
-        java-version: 17
+    # - name: Setup JDK
+    #   uses: actions/setup-java@v3
+    #   with:
+    #     distribution: "microsoft"
+    #     java-version: 17
 
     - name: Install SonarQube Scanner
       shell: bash
