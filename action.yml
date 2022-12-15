@@ -55,38 +55,12 @@ inputs:
     description: "Verbosity level for dotnet test command"
     required: false
     default: m
-  target_frameworks:
-    description: "The target framework on which tests will run (if multiple are installed)"
-    required: false
-    default: net6.0
 runs:
   using: composite
   steps:
-    - name: Setup JDK
-      uses: actions/setup-java@v3
-      with:
-        distribution: "microsoft"
-        java-version: 17
-
-    - name: Cache SonarQube Packages
-      uses: actions/cache@v1
-      with:
-        path: ~\sonar\cache
-        key: ${{ runner.os }}-sonar
-        restore-keys: ${{ runner.os }}-sonar
-
-    - name: Cache SonarQube Scanner
-      id: cache-sonar-scanner
-      uses: actions/cache@v1
-      with:
-        path: .\.sonar\scanner
-        key: ${{ runner.os }}-sonar-scanner
-        restore-keys: ${{ runner.os }}-sonar-scanner
-
     - name: Install SonarQube Scanner
-      if: steps.cache-sonar-scanner.outputs.cache-hit != 'true'
       shell: bash
-      run: dotnet tool update dotnet-sonarscanner --tool-path ./.sonar/scanner
+      run: dotnet tool install --global dotnet-sonarscanner
 
     - name: Begin SonarQube Scan for Pull Request
       if: ${{ inputs.pull-request == 'true' && inputs.code-exclusions != '' }}
@@ -103,7 +77,7 @@ runs:
         TESTS_DIR: ${{ inputs.tests-dir }}
         QUALITY_GATE_WAIT: ${{inputs.quality-gate-wait }}
       run: |
-        ./.sonar/scanner/dotnet-sonarscanner begin \
+        dotnet-sonarscanner begin \
         /k:"$SONAR_PROJECT_KEY" \
         /o:"$SONAR_ORGANIZATION" \
         /d:sonar.pullrequest.key="$PR_NUMBER" \
@@ -129,7 +103,7 @@ runs:
         TESTS_DIR: ${{ inputs.tests-dir }}
         QUALITY_GATE_WAIT: ${{inputs.quality-gate-wait }}
       run: |
-        ./.sonar/scanner/dotnet-sonarscanner begin \
+        dotnet-sonarscanner begin \
         /k:"$SONAR_PROJECT_KEY" \
         /o:"$SONAR_ORGANIZATION" \
         /d:sonar.pullrequest.key="$PR_NUMBER" \
@@ -152,7 +126,7 @@ runs:
         BRANCH_NAME: ${{ inputs.branch-name }}
         TESTS_DIR: ${{ inputs.tests-dir }}
       run: |
-        ./.sonar/scanner/dotnet-sonarscanner begin \
+        dotnet-sonarscanner begin \
         /k:"$SONAR_PROJECT_KEY" \
         /o:"$SONAR_ORGANIZATION" \
         /d:sonar.branch.name="$BRANCH_NAME" \
@@ -172,7 +146,7 @@ runs:
         BRANCH_NAME: ${{ inputs.branch-name }}
         TESTS_DIR: ${{ inputs.tests-dir }}
       run: |
-        ./.sonar/scanner/dotnet-sonarscanner begin \
+        dotnet-sonarscanner begin \
         /k:"$SONAR_PROJECT_KEY" \
         /o:"$SONAR_ORGANIZATION" \
         /d:sonar.branch.name="$BRANCH_NAME" \
@@ -180,13 +154,22 @@ runs:
         /d:sonar.host.url="$SONAR_HOST_URL" \
         /d:sonar.cs.opencover.reportsPaths="./$TESTS_DIR/**/results/*.opencover.xml"
 
+    - name: Restore
+      shell: bash
+      run: |
+        dotnet restore
+
+    - name: Build
+      shell: bash
+      run: |
+        dotnet build --no-restore
+
     - name: Run tests
       if: ${{ inputs.solution != '' && inputs.project == '' }}
       shell: bash
       env:
         SOLUTION: ${{ inputs.solution }}
         VERBOSITY: ${{ inputs.verbosity }}
-        TARGET_FRAMEWORKS: ${{ inputs.target_frameworks }}
       run: |
         dotnet test $SOLUTION.sln \
         /p:CollectCoverage=true \
@@ -194,7 +177,7 @@ runs:
         /p:MergeWith=./results/*.opencover.xml \
         /p:CoverletOutput=./results/ \
         /p:CoverletOutputFormat=opencover \
-        /p:TargetFrameworks=$TARGET_FRAMEWORKS \
+        --no-build --no-restore \
         --logger "GitHubActions;report-warnings=false" \
         --verbosity $VERBOSITY
 
@@ -204,7 +187,6 @@ runs:
       env:
         PROJECT: ${{ inputs.project }}
         VERBOSITY: ${{ inputs.verbosity }}
-        TARGET_FRAMEWORKS: ${{ inputs.target_frameworks }}
       run: |
         dotnet test $PROJECT \
         /p:CollectCoverage=true \
@@ -212,7 +194,7 @@ runs:
         /p:MergeWith=./results/*.opencover.xml \
         /p:CoverletOutput=./results/ \
         /p:CoverletOutputFormat=opencover \
-        /p:TargetFrameworks=$TARGET_FRAMEWORKS \
+        --no-build --no-restore \
         --logger "GitHubActions;report-warnings=false" \
         --verbosity $VERBOSITY
 
@@ -220,4 +202,4 @@ runs:
       shell: bash
       env:
         SONAR_TOKEN: ${{ inputs.sonar-token }}
-      run: ./.sonar/scanner/dotnet-sonarscanner end /d:sonar.login="$SONAR_TOKEN"
+      run: dotnet-sonarscanner end /d:sonar.login="$SONAR_TOKEN"
