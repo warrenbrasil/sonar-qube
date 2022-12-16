@@ -94,6 +94,20 @@ The target source name from the pull request
 
 Allowed values are `q[uiet]`, `m[inimal]`, `n[ormal]`, `d[etailed]`, and `diag[nostic]`
 
+### `enable-dotnet-restore`
+
+**Optional**: Runs `dotnet restore` before runs `dotnet test`. **(default is `false`)**
+
+### `enable-dotnet-build`
+
+**Optional**: Runs `dotnet build --no-restore` before runs `dotnet test`. **(default is `false`)**
+
+### `dotnet-test-flags`
+
+**Optional**: Add flags for `dotnet test` command. **(default is no flags)**.
+
+Full flags list is available [here](https://learn.microsoft.com/en-us/dotnet/core/tools/dotnet-test#synopsis).
+
 ## Usage
 
 Using for push on long-lived branches:
@@ -160,4 +174,22 @@ Using with multiline file code exclusions:
       src/Warren.Core.MyRepo.Services/**/*.cs
     pull-request: false
     branch-name: ${{ github.head_ref || github.ref_name }}
+```
+
+Using with dotnet restore, dotnet build and dotnet test flags:
+
+```yml
+- name: Warren - Run Tests and SonarQube Analysis
+  uses: warrenbrasil/sonar-qube@v3
+  with:
+    sonar-token: ${{ secrets.SONAR_TOKEN }}
+    sonar-host-url: ${{ secrets.SONAR_HOST_URL }}
+    sonar-project-key: myorg_my-project-key
+    sonar-organization: myorg
+    solution: Warren.Core.MyRepo
+    pull-request: false
+    branch-name: ${{ github.head_ref || github.ref_name }}
+    enable-dotnet-restore: true
+    enable-dotnet-build: true
+    dotnet-test-flags: --no-build --no-restore
 ```

@@ -55,6 +55,18 @@ inputs:
     description: "Verbosity level for dotnet test command"
     required: false
     default: m
+  enable-dotnet-restore:
+    description: "Runs dotnet restore before dotnet test"
+    required: false
+    default: false
+  enable-dotnet-build:
+    description: "Runs dotnet build with no restore before dotnet test"
+    required: false
+    default: false
+  dotnet-test-flags:
+    description: "Add flags for dotnet test command"
+    required: false
+    default: ""
 runs:
   using: composite
   steps:
@@ -155,11 +167,13 @@ runs:
         /d:sonar.cs.opencover.reportsPaths="./$TESTS_DIR/**/results/*.opencover.xml"
 
     - name: Restore
+      if: ${{ inputs.enable-dotnet-restore == 'true' }}
       shell: bash
       run: |
         dotnet restore
 
     - name: Build
+      if: ${{ inputs.enable-dotnet-build == 'true' }}
       shell: bash
       run: |
         dotnet build --no-restore
@@ -170,6 +184,7 @@ runs:
       env:
         SOLUTION: ${{ inputs.solution }}
         VERBOSITY: ${{ inputs.verbosity }}
+        FLAGS: ${{ inputs.dotnet-test-flags }}
       run: |
         dotnet test $SOLUTION.sln \
         /p:CollectCoverage=true \
@@ -177,8 +192,7 @@ runs:
         /p:MergeWith=./results/*.opencover.xml \
         /p:CoverletOutput=./results/ \
         /p:CoverletOutputFormat=opencover \
-        --no-build --no-restore \
-        --logger "GitHubActions;report-warnings=false" \
+        $FLAGS --logger "GitHubActions;report-warnings=false" \
         --verbosity $VERBOSITY
 
     - name: Run tests
@@ -187,6 +201,7 @@ runs:
       env:
         PROJECT: ${{ inputs.project }}
         VERBOSITY: ${{ inputs.verbosity }}
+        FLAGS: ${{ inputs.dotnet-test-flags }}
       run: |
         dotnet test $PROJECT \
         /p:CollectCoverage=true \
@@ -194,8 +209,7 @@ runs:
         /p:MergeWith=./results/*.opencover.xml \
         /p:CoverletOutput=./results/ \
         /p:CoverletOutputFormat=opencover \
-        --no-build --no-restore \
-        --logger "GitHubActions;report-warnings=false" \
+        $FLAGS --logger "GitHubActions;report-warnings=false" \
         --verbosity $VERBOSITY
 
     - name: End Sonar Scan
