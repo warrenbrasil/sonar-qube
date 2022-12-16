@@ -185,11 +185,11 @@ runs:
         SOLUTION: ${{ inputs.solution }}
         VERBOSITY: ${{ inputs.verbosity }}
         FLAGS: ${{ inputs.dotnet-test-flags }}
+        TESTS_DIR: ${{ inputs.tests-dir }}
       run: |
         dotnet test $SOLUTION.sln \
         /p:CollectCoverage=true \
         /p:ExcludeByAttribute="CompilerGeneratedAttribute" \
-        /p:MergeWith=./results/*.opencover.xml \
         /p:CoverletOutput=./results/ \
         /p:CoverletOutputFormat=opencover \
         $FLAGS --logger "GitHubActions;report-warnings=false" \
@@ -206,7 +206,6 @@ runs:
         dotnet test $PROJECT \
         /p:CollectCoverage=true \
         /p:ExcludeByAttribute="CompilerGeneratedAttribute" \
-        /p:MergeWith=./results/*.opencover.xml \
         /p:CoverletOutput=./results/ \
         /p:CoverletOutputFormat=opencover \
         $FLAGS --logger "GitHubActions;report-warnings=false" \
