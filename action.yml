@@ -64,7 +64,7 @@ inputs:
     required: false
     default: false
   dotnet-test-flags:
-    description: "Flags for dotnet test command"
+    description: "Add flags for dotnet test command"
     required: false
     default: ""
 runs:
