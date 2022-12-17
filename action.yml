@@ -186,8 +186,8 @@ runs:
         dotnet test $SOLUTION.sln \
         /p:CollectCoverage=true \
         /p:ExcludeByAttribute="CompilerGeneratedAttribute" \
-        /p:CoverletOutput=./$TESTS_DIR/ \
-        /p:MergeWith=./$TESTS_DIR/*.opencover.xml \
+        /p:CoverletOutput=$TESTS_DIR/ \
+        /p:MergeWith=$TESTS_DIR/*.opencover.xml \
         /p:CoverletOutputFormat=opencover \
         $FLAGS --logger "GitHubActions;report-warnings=false" \
         --verbosity $VERBOSITY
@@ -204,8 +204,8 @@ runs:
         dotnet test $PROJECT \
         /p:CollectCoverage=true \
         /p:ExcludeByAttribute="CompilerGeneratedAttribute" \
-        /p:CoverletOutput=./$TESTS_DIR/ \
-        /p:MergeWith=./$TESTS_DIR/*.opencover.xml \
+        /p:CoverletOutput=$TESTS_DIR/ \
+        /p:MergeWith=$TESTS_DIR/*.opencover.xml \
         /p:CoverletOutputFormat=opencover \
         $FLAGS --logger "GitHubActions;report-warnings=false" \
         --verbosity $VERBOSITY
