@@ -187,9 +187,9 @@ runs:
         /p:CollectCoverage=true \
         /p:ExcludeByAttribute="CompilerGeneratedAttribute" \
         /p:CoverletOutput=$TESTS_DIR/ \
-        /p:MergeWith=$TESTS_DIR/*.opencover.xml \
         /p:CoverletOutputFormat=opencover \
-        $FLAGS --logger "GitHubActions;report-warnings=false" \
+        --no-build --no-restore \
+        --logger "GitHubActions;report-warnings=false" \
         --verbosity $VERBOSITY
 
     - name: Run tests
@@ -205,10 +205,16 @@ runs:
         /p:CollectCoverage=true \
         /p:ExcludeByAttribute="CompilerGeneratedAttribute" \
         /p:CoverletOutput=$TESTS_DIR/ \
-        /p:MergeWith=$TESTS_DIR/*.opencover.xml \
         /p:CoverletOutputFormat=opencover \
-        $FLAGS --logger "GitHubActions;report-warnings=false" \
+        --no-build --no-restore \
+        --logger "GitHubActions;report-warnings=false" \
         --verbosity $VERBOSITY
+
+    - name: List results
+      shell: bash
+      env:
+        TESTS_DIR: ${{ github.workspace }}/results
+      run: ls $TESTS_DIR
 
     - name: End Sonar Scan
       shell: bash
