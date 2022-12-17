@@ -76,10 +76,6 @@ The target source name from the pull request
 | :warning: the parameters `solution` and `project` are optional for you to choose one to use, but you **MUST** choose one :warning: |
 | ---------------------------------------------------------------------------------------------------------------------------------- |
 
-### `tests-dir`
-
-**Optional**: The directory name which contains all the tests projects **(default is tests)**
-
 ### `code-exclusions`
 
 **Optional**: The matching path for code that should be excluded from coverage **(absolute, relative and pattern paths are acceptable)**
