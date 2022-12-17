@@ -99,7 +99,7 @@ runs:
         /d:sonar.host.url="$SONAR_HOST_URL" \
         /d:sonar.qualitygate.wait=$QUALITY_GATE_WAIT \
         /d:sonar.coverage.exclusions="$CODE_EXCLUSIONS" \
-        /d:sonar.cs.opencover.reportsPaths="./$TESTS_DIR/**/results/*.opencover.xml"
+        /d:sonar.cs.opencover.reportsPaths="./$TESTS_DIR/results/*.opencover.xml"
 
     - name: Begin SonarQube Scan for Pull Request
       if: ${{ inputs.pull-request == 'true' && inputs.code-exclusions == '' }}
@@ -124,7 +124,7 @@ runs:
         /d:sonar.login="$SONAR_TOKEN" \
         /d:sonar.host.url="$SONAR_HOST_URL" \
         /d:sonar.qualitygate.wait=$QUALITY_GATE_WAIT \
-        /d:sonar.cs.opencover.reportsPaths="./$TESTS_DIR/**/results/*.opencover.xml"
+        /d:sonar.cs.opencover.reportsPaths="./$TESTS_DIR/results/*.opencover.xml"
 
     - name: Begin SonarQube Scan
       if: ${{ inputs.pull-request == 'false' && inputs.code-exclusions != '' }}
@@ -145,7 +145,7 @@ runs:
         /d:sonar.login="$SONAR_TOKEN" \
         /d:sonar.host.url="$SONAR_HOST_URL" \
         /d:sonar.coverage.exclusions="$CODE_EXCLUSIONS" \
-        /d:sonar.cs.opencover.reportsPaths="./$TESTS_DIR/**/results/*.opencover.xml"
+        /d:sonar.cs.opencover.reportsPaths="./$TESTS_DIR/results/*.opencover.xml"
 
     - name: Begin SonarQube Scan
       if: ${{ inputs.pull-request == 'false' && inputs.code-exclusions == '' }}
@@ -164,7 +164,7 @@ runs:
         /d:sonar.branch.name="$BRANCH_NAME" \
         /d:sonar.login="$SONAR_TOKEN" \
         /d:sonar.host.url="$SONAR_HOST_URL" \
-        /d:sonar.cs.opencover.reportsPaths="./$TESTS_DIR/**/results/*.opencover.xml"
+        /d:sonar.cs.opencover.reportsPaths="./$TESTS_DIR/results/*.opencover.xml"
 
     - name: Restore
       if: ${{ inputs.enable-dotnet-restore == 'true' }}
@@ -190,7 +190,7 @@ runs:
         dotnet test $SOLUTION.sln \
         /p:CollectCoverage=true \
         /p:ExcludeByAttribute="CompilerGeneratedAttribute" \
-        /p:CoverletOutput=./results/ \
+        /p:CoverletOutput=./$TEST_DIR/results/ \
         /p:CoverletOutputFormat=opencover \
         $FLAGS --logger "GitHubActions;report-warnings=false" \
         --verbosity $VERBOSITY
@@ -202,11 +202,12 @@ runs:
         PROJECT: ${{ inputs.project }}
         VERBOSITY: ${{ inputs.verbosity }}
         FLAGS: ${{ inputs.dotnet-test-flags }}
+        TESTS_DIR: ${{ inputs.tests-dir }}
       run: |
         dotnet test $PROJECT \
         /p:CollectCoverage=true \
         /p:ExcludeByAttribute="CompilerGeneratedAttribute" \
-        /p:CoverletOutput=./results/ \
+        /p:CoverletOutput=./$TEST_DIR/results/ \
         /p:CoverletOutputFormat=opencover \
         $FLAGS --logger "GitHubActions;report-warnings=false" \
         --verbosity $VERBOSITY
