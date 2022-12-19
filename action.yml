@@ -103,7 +103,7 @@ runs:
         /d:sonar.host.url="$SONAR_HOST_URL" \
         /d:sonar.qualitygate.wait=$QUALITY_GATE_WAIT \
         /d:sonar.coverage.exclusions="$CODE_EXCLUSIONS" \
-        /d:sonar.cs.opencover.reportsPaths="$COVERAGE_REPORTS_DIR/*.opencover.xml"
+        /d:sonar.cs.opencover.reportsPaths="$COVERAGE_REPORTS_DIR/**/*.opencover.xml"
 
     - name: Begin SonarQube Scan for Pull Request
       if: ${{ inputs.pull-request == 'true' && inputs.code-exclusions == '' }}
@@ -128,7 +128,7 @@ runs:
         /d:sonar.login="$SONAR_TOKEN" \
         /d:sonar.host.url="$SONAR_HOST_URL" \
         /d:sonar.qualitygate.wait=$QUALITY_GATE_WAIT \
-        /d:sonar.cs.opencover.reportsPaths="$COVERAGE_REPORTS_DIR/*.opencover.xml"
+        /d:sonar.cs.opencover.reportsPaths="$COVERAGE_REPORTS_DIR/**/*.opencover.xml"
 
     - name: Begin SonarQube Scan
       if: ${{ inputs.pull-request == 'false' && inputs.code-exclusions != '' }}
@@ -151,7 +151,7 @@ runs:
         /d:sonar.host.url="$SONAR_HOST_URL" \
         /d:sonar.coverage.exclusions="$CODE_EXCLUSIONS" \
         /d:sonar.qualitygate.wait=$QUALITY_GATE_WAIT \
-        /d:sonar.cs.opencover.reportsPaths="$COVERAGE_REPORTS_DIR/*.opencover.xml"
+        /d:sonar.cs.opencover.reportsPaths="$COVERAGE_REPORTS_DIR/**/*.opencover.xml"
 
     - name: Begin SonarQube Scan
       if: ${{ inputs.pull-request == 'false' && inputs.code-exclusions == '' }}
@@ -172,7 +172,7 @@ runs:
         /d:sonar.login="$SONAR_TOKEN" \
         /d:sonar.host.url="$SONAR_HOST_URL" \
         /d:sonar.qualitygate.wait=$QUALITY_GATE_WAIT \
-        /d:sonar.cs.opencover.reportsPaths="$COVERAGE_REPORTS_DIR/*.opencover.xml"
+        /d:sonar.cs.opencover.reportsPaths="$COVERAGE_REPORTS_DIR/**/*.opencover.xml"
 
     - name: Restore
       if: ${{ inputs.enable-dotnet-restore == 'true' }}
