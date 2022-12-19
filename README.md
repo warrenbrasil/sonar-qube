@@ -76,10 +76,6 @@ The target source name from the pull request
 | :warning: the parameters `solution` and `project` are optional for you to choose one to use, but you **MUST** choose one :warning: |
 | ---------------------------------------------------------------------------------------------------------------------------------- |
 
-### `tests-dir`
-
-**Optional**: The directory name which contains all the tests projects **(default is tests)**
-
 ### `code-exclusions`
 
 **Optional**: The matching path for code that should be excluded from coverage **(absolute, relative and pattern paths are acceptable)**
@@ -96,15 +92,27 @@ Allowed values are `q[uiet]`, `m[inimal]`, `n[ormal]`, `d[etailed]`, and `diag[n
 
 ### `enable-dotnet-restore`
 
-**Optional**: Runs `dotnet restore` before runs `dotnet test`. **(default is `false`)**
+**Optional**: Runs `dotnet restore` before runs `dotnet test`. **(default is `true`)**
+
+### `dotnet-restore-flags`
+
+**Optional**: Add flags to `dotnet restore` command. **(defaults is no flags)**
+
+Full flags list is available [here](https://learn.microsoft.com/en-us/dotnet/core/tools/dotnet-restore#synopsis)
 
 ### `enable-dotnet-build`
 
-**Optional**: Runs `dotnet build --no-restore` before runs `dotnet test`. **(default is `false`)**
+**Optional**: Runs `dotnet build --no-restore` before runs `dotnet test`. **(default is `true`)**
+
+### `dotnet-build-flags`
+
+**Optional**: Add flags to `dotnet build` command. **(default is `--no-restore`)**
+
+Full flags list is available [here](https://learn.microsoft.com/en-us/dotnet/core/tools/dotnet-build#synopsis)
 
 ### `dotnet-test-flags`
 
-**Optional**: Add flags for `dotnet test` command. **(default is no flags)**.
+**Optional**: Add flags for `dotnet test` command. **(default is `--no-build --no-restore`)**.
 
 Full flags list is available [here](https://learn.microsoft.com/en-us/dotnet/core/tools/dotnet-test#synopsis).
 
@@ -189,7 +197,7 @@ Using with dotnet restore, dotnet build and dotnet test flags:
     solution: Warren.Core.MyRepo
     pull-request: false
     branch-name: ${{ github.head_ref || github.ref_name }}
-    enable-dotnet-restore: true
-    enable-dotnet-build: true
-    dotnet-test-flags: --no-build --no-restore
+    dotnet-restore-flags: --no-cache
+    dotnet-build-flags: --configuration Release
+    dotnet-test-flags: --configuration Release
 ```

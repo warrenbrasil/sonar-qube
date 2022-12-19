@@ -24,10 +24,6 @@ inputs:
     description: "The path of test project to be tested (do not use with solution input parameter)"
     required: false
     default: ""
-  tests-dir:
-    description: "The directory name which contains all the tests projects (default is tests)"
-    required: false
-    default: "tests"
   code-exclusions:
     description: "The matching path for code that should be excluded from coverage (absolute, relative and pattern paths are acceptable)"
     required: false
@@ -58,15 +54,23 @@ inputs:
   enable-dotnet-restore:
     description: "Runs dotnet restore before dotnet test"
     required: false
-    default: false
+    default: true
+  dotnet-restore-flags:
+    description: "Add flags to dotnet restore command"
+    required: false
+    default: ""
   enable-dotnet-build:
     description: "Runs dotnet build with no restore before dotnet test"
     required: false
-    default: false
-  dotnet-test-flags:
-    description: "Add flags for dotnet test command"
+    default: true
+  dotnet-build-flags:
+    description: "Add flags to dotnet build command"
     required: false
-    default: ""
+    default: "--no-restore"
+  dotnet-test-flags:
+    description: "Add flags to dotnet test command"
+    required: false
+    default: "--no-build --no-restore"
 runs:
   using: composite
   steps:
@@ -86,7 +90,7 @@ runs:
         PR_NUMBER: ${{ inputs.pull-request-number }}
         PR_BASE: ${{ inputs.pull-request-base }}
         PR_HEAD: ${{ inputs.pull-request-head }}
-        TESTS_DIR: ${{ inputs.tests-dir }}
+        COVERAGE_REPORTS_DIR: ${{ github.workspace }}/reports
         QUALITY_GATE_WAIT: ${{inputs.quality-gate-wait }}
       run: |
         dotnet-sonarscanner begin \
@@ -99,7 +103,7 @@ runs:
         /d:sonar.host.url="$SONAR_HOST_URL" \
         /d:sonar.qualitygate.wait=$QUALITY_GATE_WAIT \
         /d:sonar.coverage.exclusions="$CODE_EXCLUSIONS" \
-        /d:sonar.cs.opencover.reportsPaths="./$TESTS_DIR/**/results/*.opencover.xml"
+        /d:sonar.cs.opencover.reportsPaths="$COVERAGE_REPORTS_DIR/**/*.opencover.xml"
 
     - name: Begin SonarQube Scan for Pull Request
       if: ${{ inputs.pull-request == 'true' && inputs.code-exclusions == '' }}
@@ -112,7 +116,7 @@ runs:
         PR_NUMBER: ${{ inputs.pull-request-number }}
         PR_BASE: ${{ inputs.pull-request-base }}
         PR_HEAD: ${{ inputs.pull-request-head }}
-        TESTS_DIR: ${{ inputs.tests-dir }}
+        COVERAGE_REPORTS_DIR: ${{ github.workspace }}/reports
         QUALITY_GATE_WAIT: ${{inputs.quality-gate-wait }}
       run: |
         dotnet-sonarscanner begin \
@@ -124,7 +128,7 @@ runs:
         /d:sonar.login="$SONAR_TOKEN" \
         /d:sonar.host.url="$SONAR_HOST_URL" \
         /d:sonar.qualitygate.wait=$QUALITY_GATE_WAIT \
-        /d:sonar.cs.opencover.reportsPaths="./$TESTS_DIR/**/results/*.opencover.xml"
+        /d:sonar.cs.opencover.reportsPaths="$COVERAGE_REPORTS_DIR/**/*.opencover.xml"
 
     - name: Begin SonarQube Scan
       if: ${{ inputs.pull-request == 'false' && inputs.code-exclusions != '' }}
@@ -136,7 +140,8 @@ runs:
         SONAR_ORGANIZATION: ${{ inputs.sonar-organization }}
         CODE_EXCLUSIONS: ${{ inputs.code-exclusions }}
         BRANCH_NAME: ${{ inputs.branch-name }}
-        TESTS_DIR: ${{ inputs.tests-dir }}
+        COVERAGE_REPORTS_DIR: ${{ github.workspace }}/reports
+        QUALITY_GATE_WAIT: ${{inputs.quality-gate-wait }}
       run: |
         dotnet-sonarscanner begin \
         /k:"$SONAR_PROJECT_KEY" \
@@ -145,7 +150,8 @@ runs:
         /d:sonar.login="$SONAR_TOKEN" \
         /d:sonar.host.url="$SONAR_HOST_URL" \
         /d:sonar.coverage.exclusions="$CODE_EXCLUSIONS" \
-        /d:sonar.cs.opencover.reportsPaths="./$TESTS_DIR/**/results/*.opencover.xml"
+        /d:sonar.qualitygate.wait=$QUALITY_GATE_WAIT \
+        /d:sonar.cs.opencover.reportsPaths="$COVERAGE_REPORTS_DIR/**/*.opencover.xml"
 
     - name: Begin SonarQube Scan
       if: ${{ inputs.pull-request == 'false' && inputs.code-exclusions == '' }}
@@ -156,7 +162,8 @@ runs:
         SONAR_PROJECT_KEY: ${{ inputs.sonar-project-key }}
         SONAR_ORGANIZATION: ${{ inputs.sonar-organization }}
         BRANCH_NAME: ${{ inputs.branch-name }}
-        TESTS_DIR: ${{ inputs.tests-dir }}
+        COVERAGE_REPORTS_DIR: ${{ github.workspace }}/reports
+        QUALITY_GATE_WAIT: ${{inputs.quality-gate-wait }}
       run: |
         dotnet-sonarscanner begin \
         /k:"$SONAR_PROJECT_KEY" \
@@ -164,53 +171,58 @@ runs:
         /d:sonar.branch.name="$BRANCH_NAME" \
         /d:sonar.login="$SONAR_TOKEN" \
         /d:sonar.host.url="$SONAR_HOST_URL" \
-        /d:sonar.cs.opencover.reportsPaths="./$TESTS_DIR/**/results/*.opencover.xml"
+        /d:sonar.qualitygate.wait=$QUALITY_GATE_WAIT \
+        /d:sonar.cs.opencover.reportsPaths="$COVERAGE_REPORTS_DIR/**/*.opencover.xml"
 
     - name: Restore
       if: ${{ inputs.enable-dotnet-restore == 'true' }}
       shell: bash
+      env:
+        FLAGS: ${{ inputs.dotnet-restore-flags }}
       run: |
-        dotnet restore
+        dotnet restore $FLAGS
 
     - name: Build
       if: ${{ inputs.enable-dotnet-build == 'true' }}
       shell: bash
+      env:
+        FLAGS: ${{ inputs.dotnet-build-flags }}
       run: |
-        dotnet build --no-restore
+        dotnet build $FLAGS
 
     - name: Run tests
       if: ${{ inputs.solution != '' && inputs.project == '' }}
       shell: bash
       env:
         SOLUTION: ${{ inputs.solution }}
-        VERBOSITY: ${{ inputs.verbosity }}
+        COVERAGE_REPORTS_DIR: ${{ github.workspace }}/reports
         FLAGS: ${{ inputs.dotnet-test-flags }}
+        VERBOSITY: ${{ inputs.verbosity }}
       run: |
         dotnet test $SOLUTION.sln \
-        /p:CollectCoverage=true \
-        /p:ExcludeByAttribute="CompilerGeneratedAttribute" \
-        /p:MergeWith=./results/*.opencover.xml \
-        /p:CoverletOutput=./results/ \
-        /p:CoverletOutputFormat=opencover \
-        $FLAGS --logger "GitHubActions;report-warnings=false" \
-        --verbosity $VERBOSITY
+        --collect:"XPlat Code Coverage" \
+        --results-directory:"$COVERAGE_REPORTS_DIR/" \
+        $FLAGS \
+        --logger "GitHubActions;report-warnings=false" \
+        --verbosity $VERBOSITY -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover \
+        DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.ExcludeByAttribute=CompilerGeneratedAttribute
 
     - name: Run tests
       if: ${{ inputs.solution == '' && inputs.project != '' }}
       shell: bash
       env:
         PROJECT: ${{ inputs.project }}
-        VERBOSITY: ${{ inputs.verbosity }}
+        COVERAGE_REPORTS_DIR: ${{ github.workspace }}/reports
         FLAGS: ${{ inputs.dotnet-test-flags }}
+        VERBOSITY: ${{ inputs.verbosity }}
       run: |
         dotnet test $PROJECT \
-        /p:CollectCoverage=true \
-        /p:ExcludeByAttribute="CompilerGeneratedAttribute" \
-        /p:MergeWith=./results/*.opencover.xml \
-        /p:CoverletOutput=./results/ \
-        /p:CoverletOutputFormat=opencover \
-        $FLAGS --logger "GitHubActions;report-warnings=false" \
-        --verbosity $VERBOSITY
+        --collect:"XPlat Code Coverage" \
+        --results-directory:"$COVERAGE_REPORTS_DIR/" \
+        $FLAGS \
+        --logger "GitHubActions;report-warnings=false" \
+        --verbosity $VERBOSITY -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover \
+        DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.ExcludeByAttribute=CompilerGeneratedAttribute
 
     - name: End Sonar Scan
       shell: bash
