@@ -54,7 +54,7 @@ inputs:
   enable-dotnet-restore:
     description: "Runs dotnet restore before dotnet test"
     required: false
-    default: false
+    default: true
   dotnet-restore-flags:
     description: "Add flags to dotnet restore command"
     required: false
@@ -62,15 +62,15 @@ inputs:
   enable-dotnet-build:
     description: "Runs dotnet build with no restore before dotnet test"
     required: false
-    default: false
+    default: true
   dotnet-build-flags:
     description: "Add flags to dotnet build command"
     required: false
-    default: ""
+    default: "--no-restore"
   dotnet-test-flags:
     description: "Add flags to dotnet test command"
     required: false
-    default: ""
+    default: "--no-build --no-restore"
 runs:
   using: composite
   steps:
