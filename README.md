@@ -94,9 +94,21 @@ Allowed values are `q[uiet]`, `m[inimal]`, `n[ormal]`, `d[etailed]`, and `diag[n
 
 **Optional**: Runs `dotnet restore` before runs `dotnet test`. **(default is `false`)**
 
+### `dotnet-restore-flags`
+
+**Optional**: Add flags to `dotnet restore` command. **(defaults is no flags)**
+
+Full flags list is available [here](https://learn.microsoft.com/en-us/dotnet/core/tools/dotnet-restore#synopsis)
+
 ### `enable-dotnet-build`
 
 **Optional**: Runs `dotnet build --no-restore` before runs `dotnet test`. **(default is `false`)**
+
+### `dotnet-build-flags`
+
+**Optional**: Add flags to `dotnet build` command. **(default is no flags)**
+
+Full flags list is available [here](https://learn.microsoft.com/en-us/dotnet/core/tools/dotnet-build#synopsis)
 
 ### `dotnet-test-flags`
 
