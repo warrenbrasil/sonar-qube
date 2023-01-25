@@ -116,6 +116,10 @@ Full flags list is available [here](https://learn.microsoft.com/en-us/dotnet/cor
 
 Full flags list is available [here](https://learn.microsoft.com/en-us/dotnet/core/tools/dotnet-test#synopsis).
 
+### `export-path`
+
+**Optional**: Boolean value indicating if `$HOME/.dotnet/tools` should be added to the `$PATH` variable. **(default is `false`)**
+
 ## Usage
 
 Using for push on long-lived branches:
