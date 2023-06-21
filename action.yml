@@ -109,7 +109,7 @@ runs:
         COVERAGE_REPORTS_DIR: ${{ github.workspace }}/reports
         QUALITY_GATE_WAIT: ${{inputs.quality-gate-wait }}
       run: |
-        dotnet-sonarscanner begin \
+        ~/.dotnet/tools/dotnet-sonarscanner begin \
         /k:"$SONAR_PROJECT_KEY" \
         /o:"$SONAR_ORGANIZATION" \
         /d:sonar.pullrequest.key="$PR_NUMBER" \
@@ -135,7 +135,7 @@ runs:
         COVERAGE_REPORTS_DIR: ${{ github.workspace }}/reports
         QUALITY_GATE_WAIT: ${{inputs.quality-gate-wait }}
       run: |
-        dotnet-sonarscanner begin \
+        ~/.dotnet/tools/dotnet-sonarscanner begin \
         /k:"$SONAR_PROJECT_KEY" \
         /o:"$SONAR_ORGANIZATION" \
         /d:sonar.pullrequest.key="$PR_NUMBER" \
@@ -159,7 +159,7 @@ runs:
         COVERAGE_REPORTS_DIR: ${{ github.workspace }}/reports
         QUALITY_GATE_WAIT: ${{inputs.quality-gate-wait }}
       run: |
-        dotnet-sonarscanner begin \
+        ~/.dotnet/tools/dotnet-sonarscanner begin \
         /k:"$SONAR_PROJECT_KEY" \
         /o:"$SONAR_ORGANIZATION" \
         /d:sonar.branch.name="$BRANCH_NAME" \
@@ -181,7 +181,7 @@ runs:
         COVERAGE_REPORTS_DIR: ${{ github.workspace }}/reports
         QUALITY_GATE_WAIT: ${{inputs.quality-gate-wait }}
       run: |
-        dotnet-sonarscanner begin \
+        ~/.dotnet/tools/dotnet-sonarscanner begin \
         /k:"$SONAR_PROJECT_KEY" \
         /o:"$SONAR_ORGANIZATION" \
         /d:sonar.branch.name="$BRANCH_NAME" \
@@ -244,7 +244,7 @@ runs:
       shell: bash
       env:
         SONAR_TOKEN: ${{ inputs.sonar-token }}
-      run: dotnet-sonarscanner end /d:sonar.login="$SONAR_TOKEN"
+      run: ~/.dotnet/tools/dotnet-sonarscanner end /d:sonar.login="$SONAR_TOKEN"
 
     - name: Uninstall SonarQube Scanner
       if: ${{ inputs.environment-cleanup == 'true' }}
