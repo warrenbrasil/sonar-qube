@@ -92,7 +92,7 @@ runs:
     - name: Add dotnet tools to PATH
       if: ${{ inputs.export-path == 'true' }}
       shell: bash
-      run: export $PATH=$PATH:$HOME/.dotnet/tools
+      run: export $PATH=$PATH:$DOTNET_ROOT/.dotnet/tools
 
     - name: Begin SonarQube Scan for Pull Request
       if: ${{ inputs.pull-request == 'true' && inputs.code-exclusions != '' }}
