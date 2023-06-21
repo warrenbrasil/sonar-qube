@@ -74,9 +74,17 @@ inputs:
   export-path:
     description: Boolean value indicating if $HOME/.dotnet/tools should be added to the $PATH variable.
     default: false
+  environment-cleanup:
+    description: Boolean value indicating if dotnet-sonarscanner should be uninstalled before and after analysis
+    default: false
 runs:
   using: composite
   steps:
+    - name: Uninstall SonarQube Scanner
+      if: ${{ inputs.environment-cleanup == 'true' }}
+      shell: bash
+      run: dotnet tool uninstall --global dotnet-sonarscanner || true
+
     - name: Install SonarQube Scanner
       shell: bash
       run: dotnet tool install --global dotnet-sonarscanner
@@ -237,3 +245,8 @@ runs:
       env:
         SONAR_TOKEN: ${{ inputs.sonar-token }}
       run: dotnet-sonarscanner end /d:sonar.login="$SONAR_TOKEN"
+
+    - name: Uninstall SonarQube Scanner
+      if: ${{ inputs.environment-cleanup == 'true' }}
+      shell: bash
+      run: dotnet tool uninstall --global dotnet-sonarscanner || true

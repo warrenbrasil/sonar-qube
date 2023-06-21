@@ -120,6 +120,10 @@ Full flags list is available [here](https://learn.microsoft.com/en-us/dotnet/cor
 
 **Optional**: Boolean value indicating if `$HOME/.dotnet/tools` should be added to the `$PATH` variable. **(default is `false`)**
 
+### `environment-cleanup`
+
+**Optional**: Boolean value indicating if `dotnet-sonarscanner` should be uninstalled before and after analysis **(default is `false`)**
+
 ## Usage
 
 Using for push on long-lived branches:
