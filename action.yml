@@ -74,6 +74,12 @@ inputs:
 runs:
   using: composite
   steps:
+    - name: Install JDK
+      uses: actions/setup-java@v4
+      with:
+        distribution: "microsoft"
+        java-version: "17"
+
     - name: Install SonarQube Scanner
       shell: bash
       run: dotnet tool install --global dotnet-sonarscanner
