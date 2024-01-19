@@ -71,6 +71,10 @@ inputs:
     description: "Add flags to dotnet test command"
     required: false
     default: "--no-build --no-restore"
+  export-path:
+    description: Boolean value indicating if $HOME/.dotnet/tools should be added to the $PATH variable.
+    default: false
+
 runs:
   using: composite
   steps:
@@ -83,6 +87,11 @@ runs:
     - name: Install SonarQube Scanner
       shell: bash
       run: dotnet tool install --global dotnet-sonarscanner
+
+    - name: Add dotnet tools to PATH
+      if: ${{ inputs.export-path == 'true' }}
+      shell: bash
+      run: export PATH=$PATH:$HOME/.dotnet/tools
 
     - name: Begin SonarQube Scan for Pull Request
       if: ${{ inputs.pull-request == 'true' && inputs.code-exclusions != '' }}
