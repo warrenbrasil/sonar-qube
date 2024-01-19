@@ -86,7 +86,7 @@ runs:
 
     - name: Create Tool Directory
       shell: bash
-      run: mkdir $HOME/sonar-scanner
+      run: mkdir -p $HOME/sonar-scanner
 
     - name: Install SonarQube Scanner
       shell: bash
