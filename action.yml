@@ -86,7 +86,7 @@ runs:
 
     - name: Install SonarQube Scanner
       shell: bash
-      run: dotnet tool install --global dotnet-sonarscanner
+      run: dotnet tool install --global dotnet-sonarscanner || true
 
     - name: Add dotnet tools to PATH
       if: ${{ inputs.export-path == 'true' }}
