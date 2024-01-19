@@ -90,7 +90,7 @@ runs:
 
     - name: Install SonarQube Scanner
       shell: bash
-      run: dotnet tool install --global dotnet-sonarscanner --tool-path $HOME/sonar-scanner || true
+      run: dotnet tool install dotnet-sonarscanner --tool-path $HOME/sonar-scanner || true
 
     - name: Begin SonarQube Scan for Pull Request
       if: ${{ inputs.pull-request == 'true' && inputs.code-exclusions != '' }}
