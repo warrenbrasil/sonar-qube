@@ -71,9 +71,6 @@ inputs:
     description: "Add flags to dotnet test command"
     required: false
     default: "--no-build --no-restore"
-  export-path:
-    description: Boolean value indicating if $HOME/.dotnet/tools should be added to the $PATH variable.
-    default: false
 
 runs:
   using: composite
