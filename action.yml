@@ -71,6 +71,10 @@ inputs:
     description: "Add flags to dotnet test command"
     required: false
     default: "--no-build --no-restore"
+  export-path:
+    description: Boolean value indicating if $HOME/.dotnet/tools should be added to the $PATH variable.
+    default: false
+
 runs:
   using: composite
   steps:
@@ -80,9 +84,13 @@ runs:
         distribution: "microsoft"
         java-version: "17"
 
+    - name: Create Tool Directory
+      shell: bash
+      run: mkdir -p $HOME/sonar-scanner
+
     - name: Install SonarQube Scanner
       shell: bash
-      run: dotnet tool install --global dotnet-sonarscanner
+      run: dotnet tool install dotnet-sonarscanner --tool-path $HOME/sonar-scanner || true
 
     - name: Begin SonarQube Scan for Pull Request
       if: ${{ inputs.pull-request == 'true' && inputs.code-exclusions != '' }}
@@ -99,7 +107,7 @@ runs:
         COVERAGE_REPORTS_DIR: ${{ github.workspace }}/reports
         QUALITY_GATE_WAIT: ${{inputs.quality-gate-wait }}
       run: |
-        dotnet-sonarscanner begin \
+        $HOME/sonar-scanner/dotnet-sonarscanner begin \
         /k:"$SONAR_PROJECT_KEY" \
         /o:"$SONAR_ORGANIZATION" \
         /d:sonar.pullrequest.key="$PR_NUMBER" \
@@ -125,7 +133,7 @@ runs:
         COVERAGE_REPORTS_DIR: ${{ github.workspace }}/reports
         QUALITY_GATE_WAIT: ${{inputs.quality-gate-wait }}
       run: |
-        dotnet-sonarscanner begin \
+        $HOME/sonar-scanner/dotnet-sonarscanner begin \
         /k:"$SONAR_PROJECT_KEY" \
         /o:"$SONAR_ORGANIZATION" \
         /d:sonar.pullrequest.key="$PR_NUMBER" \
@@ -149,7 +157,7 @@ runs:
         COVERAGE_REPORTS_DIR: ${{ github.workspace }}/reports
         QUALITY_GATE_WAIT: ${{inputs.quality-gate-wait }}
       run: |
-        dotnet-sonarscanner begin \
+        $HOME/sonar-scanner/dotnet-sonarscanner begin \
         /k:"$SONAR_PROJECT_KEY" \
         /o:"$SONAR_ORGANIZATION" \
         /d:sonar.branch.name="$BRANCH_NAME" \
@@ -171,7 +179,7 @@ runs:
         COVERAGE_REPORTS_DIR: ${{ github.workspace }}/reports
         QUALITY_GATE_WAIT: ${{inputs.quality-gate-wait }}
       run: |
-        dotnet-sonarscanner begin \
+        $HOME/sonar-scanner/dotnet-sonarscanner begin \
         /k:"$SONAR_PROJECT_KEY" \
         /o:"$SONAR_ORGANIZATION" \
         /d:sonar.branch.name="$BRANCH_NAME" \
@@ -234,4 +242,4 @@ runs:
       shell: bash
       env:
         SONAR_TOKEN: ${{ inputs.sonar-token }}
-      run: dotnet-sonarscanner end /d:sonar.login="$SONAR_TOKEN"
+      run: $HOME/sonar-scanner/dotnet-sonarscanner end /d:sonar.login="$SONAR_TOKEN"
