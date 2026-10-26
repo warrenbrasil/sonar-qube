@@ -87,7 +87,7 @@ runs:
 
     - name: Install SonarQube Scanner
       shell: bash
-      run: dotnet tool install dotnet-sonarscanner --tool-path $HOME/sonar-scanner || true
+      run: dotnet tool install dotnet-sonarscanner --tool-path $HOME/sonar-scanner --version 11.3.*
 
     - name: Begin SonarQube Scan for Pull Request
       if: ${{ inputs.pull-request == 'true' && inputs.code-exclusions != '' }}
@@ -110,7 +110,7 @@ runs:
         /d:sonar.pullrequest.key="$PR_NUMBER" \
         /d:sonar.pullrequest.branch="$PR_HEAD" \
         /d:sonar.pullrequest.base="$PR_BASE" \
-        /d:sonar.login="$SONAR_TOKEN" \
+        /d:sonar.token="$SONAR_TOKEN" \
         /d:sonar.host.url="$SONAR_HOST_URL" \
         /d:sonar.qualitygate.wait=$QUALITY_GATE_WAIT \
         /d:sonar.coverage.exclusions="$CODE_EXCLUSIONS" \
@@ -136,7 +136,7 @@ runs:
         /d:sonar.pullrequest.key="$PR_NUMBER" \
         /d:sonar.pullrequest.branch="$PR_HEAD" \
         /d:sonar.pullrequest.base="$PR_BASE" \
-        /d:sonar.login="$SONAR_TOKEN" \
+        /d:sonar.token="$SONAR_TOKEN" \
         /d:sonar.host.url="$SONAR_HOST_URL" \
         /d:sonar.qualitygate.wait=$QUALITY_GATE_WAIT \
         /d:sonar.cs.opencover.reportsPaths="$COVERAGE_REPORTS_DIR/**/*.opencover.xml"
@@ -158,7 +158,7 @@ runs:
         /k:"$SONAR_PROJECT_KEY" \
         /o:"$SONAR_ORGANIZATION" \
         /d:sonar.branch.name="$BRANCH_NAME" \
-        /d:sonar.login="$SONAR_TOKEN" \
+        /d:sonar.token="$SONAR_TOKEN" \
         /d:sonar.host.url="$SONAR_HOST_URL" \
         /d:sonar.coverage.exclusions="$CODE_EXCLUSIONS" \
         /d:sonar.qualitygate.wait=$QUALITY_GATE_WAIT \
@@ -180,7 +180,7 @@ runs:
         /k:"$SONAR_PROJECT_KEY" \
         /o:"$SONAR_ORGANIZATION" \
         /d:sonar.branch.name="$BRANCH_NAME" \
-        /d:sonar.login="$SONAR_TOKEN" \
+        /d:sonar.token="$SONAR_TOKEN" \
         /d:sonar.host.url="$SONAR_HOST_URL" \
         /d:sonar.qualitygate.wait=$QUALITY_GATE_WAIT \
         /d:sonar.cs.opencover.reportsPaths="$COVERAGE_REPORTS_DIR/**/*.opencover.xml"
@@ -239,4 +239,4 @@ runs:
       shell: bash
       env:
         SONAR_TOKEN: ${{ inputs.sonar-token }}
-      run: $HOME/sonar-scanner/dotnet-sonarscanner end /d:sonar.login="$SONAR_TOKEN"
+      run: $HOME/sonar-scanner/dotnet-sonarscanner end /d:sonar.token="$SONAR_TOKEN"
