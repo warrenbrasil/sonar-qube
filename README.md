@@ -6,7 +6,7 @@ Composite GitHub Action that runs your .NET tests with code coverage and publish
 
 ## Quick start
 
-Store the SonarQube token and server URL as repository or organization secrets (`SONAR_TOKEN`, `SONAR_HOST_URL`), then add the action after checking out the code and setting up the .NET SDK.
+Store the SonarQube token and server URL as repository or organization secrets (`SONAR_TOKEN`, `SONAR_HOST_URL`), then add the action after checking out the code with full history (`fetch-depth: 0`) and setting up the .NET SDK.
 
 Pull requests:
 
@@ -19,6 +19,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # full history; SonarQube needs it (see Prerequisites)
 
       - uses: actions/setup-dotnet@v4
         with:
@@ -50,6 +52,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # full history; SonarQube needs it (see Prerequisites)
 
       - uses: actions/setup-dotnet@v4
         with:
@@ -100,9 +104,9 @@ The action runs these steps, in this order, inside your job:
 > The tests run **inside this action**, between `begin` and `end`. If the SonarQube `begin` step fails (for example, the server is unreachable or incompatible with the scanner), the tests **do not run** at all. Before trusting the check, open the action's steps in the job log and confirm that `Run tests` actually ran.
 
 > [!NOTE]
-> Set exactly one of `solution` or `project`. If both or neither are set, the `Run tests` step is skipped and no coverage is produced.
+> Set exactly one of `solution` or `project`. If both or neither are set, the `Run tests` step is skipped and no coverage is produced. `End Sonar Scan` still runs (it has no condition), so the analysis is uploaded without coverage and the job can still fail on the upload or, with `quality-gate-wait: true`, on the Quality Gate.
 >
-> `pull-request` must be exactly `true` or `false`. With any other value no `begin` step runs.
+> `pull-request` must be exactly `true` or `false`. With any other value no `begin` step runs, but the restore, build and test steps still run (according to their own inputs), and `End Sonar Scan` then fails because no analysis was started.
 
 ## Versioning
 
@@ -136,6 +140,8 @@ Before using this action, make sure that all test projects have the following de
 - `coverlet.msbuild`
 - `GitHubActionsTestLogger`
 
+Check out the repository with full history (`actions/checkout` with `fetch-depth: 0`). The default shallow clone (`fetch-depth: 1`) breaks SonarQube's new-code detection, blame and, in pull requests, merge-base resolution.
+
 The .NET SDK must be available on the runner (for example, via `actions/setup-dotnet`). The action runs `dotnet` from the workspace root, so `solution` and `project` are resolved relative to it.
 
 ## Requirements
@@ -158,7 +164,7 @@ The .NET SDK must be available on the runner (for example, via `actions/setup-do
 | `pull-request-head` | When `pull-request: true` | — | The source (head) branch of the pull request. |
 | `solution` | One of `solution`/`project` | `""` | Solution file name **without** the `.sln` extension. Do not use with `project`. |
 | `project` | One of `solution`/`project` | `""` | Path of the test project to be tested. Do not use with `solution`. |
-| `code-exclusions` | No | `""` | Paths excluded from coverage (absolute, relative and pattern paths are accepted; comma-separated). |
+| `code-exclusions` | No | `""` | Paths excluded from coverage (absolute, relative and pattern paths are accepted; comma-separated, **no space after the comma**: `a/**/*.cs,b/**/*.cs`). |
 | `quality-gate-wait` | No | `true` | Wait for the Quality Gate result. When `true`, the step fails if the Quality Gate fails. |
 | `verbosity` | No | `m` | Verbosity of `dotnet test`: `q[uiet]`, `m[inimal]`, `n[ormal]`, `d[etailed]` or `diag[nostic]`. |
 | `enable-dotnet-restore` | No | `true` | Run `dotnet restore` before `dotnet test`. |
@@ -219,7 +225,7 @@ With code exclusions:
     branch-name: ${{ github.head_ref || github.ref_name }}
 ```
 
-With multiline code exclusions:
+With multiple code exclusions (one line, comma-separated, no spaces):
 
 ```yml
 - name: Warren - Run Tests and SonarQube Analysis
@@ -230,9 +236,7 @@ With multiline code exclusions:
     sonar-project-key: my-project-key
     sonar-organization: my-org
     solution: MySolution
-    code-exclusions: >-
-      tests/MyProject.Fixtures/**/*.cs,
-      src/MyProject.Services/**/*.cs
+    code-exclusions: "tests/MyProject.Fixtures/**/*.cs,src/MyProject.Services/**/*.cs"
     pull-request: false
     branch-name: ${{ github.head_ref || github.ref_name }}
 ```
